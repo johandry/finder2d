@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/johandry/finder2d"
 )
@@ -45,15 +46,16 @@ func main() {
 		log.Fatalf("fail to load the image file %q. %s", frameFileName, err)
 	}
 
-	fmt.Printf("Frame: \n%s", f.Source)
 	x, y := f.Source.Size()
-	fmt.Printf("Frame Size: %dx%d\n", x, y)
+	fmt.Printf("Frame (%dx%d): \n%s\n", x, y, f.Source)
 
-	fmt.Printf("\nImage: \n%s", f.Target)
 	x, y = f.Target.Size()
-	fmt.Printf("Image Size: %dx%d\n", x, y)
+	fmt.Printf("Image (%dx%d): \n%s\n", x, y, f.Target)
 
+	fmt.Println("Finding matches ...")
 	f.SearchSimple()
 
-	fmt.Printf("\nMatches: %s\n", f)
+	n := len(f.Matches)
+
+	fmt.Printf("Matches (%d): %s\n", n, strings.Replace(f.String(), "),(", ")\n(", -1))
 }

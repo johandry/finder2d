@@ -50,11 +50,6 @@ func TestFinder2D_LoadMatrix(t *testing.T) {
 }
 
 func TestMatrix_Sample(t *testing.T) {
-	type fields struct {
-		Content [][]int
-		maxX    int
-		maxY    int
-	}
 	type args struct {
 		x int
 		y int
@@ -62,20 +57,22 @@ func TestMatrix_Sample(t *testing.T) {
 		h int
 	}
 	tests := []struct {
-		name   string
-		fields fields
-		args   args
-		want   *Matrix
+		name string
+		args args
+		want *Matrix
 	}{
-		// TODO: Add test cases.
+		{"empty", args{}, &Matrix{}},
+		{"larger sample", args{15, 15, 10, 10}, nil},
+		{"2x2", args{15, 15, 2, 2}, &Matrix{Content: [][]int{{1, 1}, {1, 1}}, maxX: 2, maxY: 2}},
+		{"3x3", args{1, 2, 3, 3}, &Matrix{Content: [][]int{{1, 0, 1}, {1, 1, 1}, {0, 1, 1}}, maxX: 3, maxY: 3}},
+		{"4x4", args{0, 16, 4, 4}, &Matrix{Content: [][]int{{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}, maxX: 4, maxY: 4}},
+	}
+	m, err := LoadMatrix(bytes.NewBufferString(string(testMatrixData[0])), testMatrixOne, testMatrixZero)
+	if err != nil {
+		t.Errorf("Matrix.Sample() failed to load the matrix. %s", err)
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			m := &Matrix{
-				Content: tt.fields.Content,
-				maxX:    tt.fields.maxX,
-				maxY:    tt.fields.maxY,
-			}
 			if got := m.Sample(tt.args.x, tt.args.y, tt.args.w, tt.args.h); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Matrix.Sample() = %v, want %v", got, tt.want)
 			}
@@ -84,31 +81,29 @@ func TestMatrix_Sample(t *testing.T) {
 }
 
 func TestMatrix_Compare(t *testing.T) {
-	type fields struct {
-		Content [][]int
-		maxX    int
-		maxY    int
-	}
-	type args struct {
-		m1 *Matrix
-	}
 	tests := []struct {
 		name    string
-		fields  fields
-		args    args
+		m       []byte
+		m1      []byte
 		want    float64
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{"same", testMatrixData[0], testMatrixData[0], 100.0, false},
+		{"diff", testMatrixData[0], testMatrixData[1], 94.0, false},
+		{"diff size", testMatrixData[0], testMatrixData[2], 0, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			m := &Matrix{
-				Content: tt.fields.Content,
-				maxX:    tt.fields.maxX,
-				maxY:    tt.fields.maxY,
+			m, err := LoadMatrix(bytes.NewBufferString(string(tt.m)), testMatrixOne, testMatrixZero)
+			if err != nil {
+				t.Errorf("Matrix.Compare() failed to load the source matrix. %s", err)
 			}
-			got, err := m.Compare(tt.args.m1)
+			m1, err := LoadMatrix(bytes.NewBufferString(string(tt.m1)), testMatrixOne, testMatrixZero)
+			if err != nil {
+				t.Errorf("Matrix.Compare() failed to load the target matrix. %s", err)
+			}
+			// t.Logf("Compare Matrix:\n%s == \n%s\n", m, m1)
+			got, err := m.Compare(m1)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Matrix.Compare() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -118,4 +113,56 @@ func TestMatrix_Compare(t *testing.T) {
 			}
 		})
 	}
+}
+
+var testMatrixOne = []byte(DefaultOne)[0]
+var testMatrixZero = []byte(DefaultZero)[0]
+var testMatrixData = [][]byte{
+	[]byte(`++++++++++++++ +++++
++++++++++++++++++++ 
+++ +++++++ +++++++++
+++++++++++++++ + + +
++ +++++++++ +++++++ 
+++++ +++++++++ +++++
++++++++++++++ ++++++
+++ +++++++++++++ ++ 
++++++ +  ++++ ++++  
+++++++++++++++++ +++
+++++++ ++++ +++++++ 
+++++++++++++++++++ +
++++++ ++++++++++  ++
+++ + +++++ ++ ++ ++ 
+++++++++++ +++++ +++
+++++++++++++  +++++ 
+++   +++++++ +++++++
++ +  ++++++ ++++ +++
++  + + ++++ ++ + +++
++   +  ++ ++++++++++`),
+
+	[]byte(`++++++++++++++ +++++
++++++++++++++++++++ 
+++ +++++++ +++++++++
+++++++++++++++ + + +
++ +++++++++ +++++++ 
+++++ +++++++++ +++++
+++++++  +++++ ++++++
+++ +++++++++++++ ++ 
++++++ +  ++++ ++++  
+++++++++++++++++ +++
+++++++ ++++ +++++++ 
+++++++++++++++++++ +
++++++ ++++++++++  ++
+++ + +++++ ++ ++ ++ 
+++++++++++ +++++ +++
+++++++++++++  +++++ 
++++++++++++ ++++++++
++ +++++++++ ++++ +++
++   +++ ++++ ++ + ++
++  ++ ++ ++++++++++ `),
+
+	[]byte(`++ ++
++++++
++  ++
+++++ 
++ +++`),
 }
