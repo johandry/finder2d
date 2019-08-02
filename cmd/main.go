@@ -57,5 +57,5 @@ func main() {
 
 	n := len(f.Matches)
 
-	fmt.Printf("Matches (%d): %s\n", n, strings.Replace(f.String(), "),(", ")\n(", -1))
+	fmt.Printf("Matches (%d): \n%s\n", n, strings.Replace(f.String(), "),(", ")\n(", -1))
 }

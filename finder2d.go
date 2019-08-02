@@ -10,6 +10,15 @@ import (
 // percentage lower than this number is not considered
 const DefaultMinMatchPercentage float64 = 50.0
 
+// MinDelta minimum difference between coordinates of group of matches to be
+// considered the same image
+const MinDelta = 3
+
+const (
+	unoMatch  = `🔸`
+	ceroMatch = `◼️️`
+)
+
 // Default values for a one and a zero in a matrix
 const (
 	DefaultOne  = `+`
@@ -32,8 +41,8 @@ type Finder2D struct {
 	Percentage float64
 }
 
-func (r *Match) String() string {
-	return fmt.Sprintf("(%d,%d,%f)", r.X, r.Y, r.Percentage)
+func (m *Match) String() string {
+	return fmt.Sprintf("(%d,%d,%f)", m.X, m.Y, m.Percentage)
 }
 
 // New create an empty Finder 2D
@@ -53,7 +62,7 @@ func New(one, zero byte, percentage float64) *Finder2D {
 	}
 }
 
-func (f *Finder2D) String() string {
+func (f *Finder2D) PrintMatches() string {
 	var b bytes.Buffer
 	b.WriteString("[")
 	first := true
@@ -66,6 +75,49 @@ func (f *Finder2D) String() string {
 		}
 	}
 	b.WriteString("]")
+	return b.String()
+}
+
+// IsAMatchPoint returns true if the coordinate is a match coordinate
+func (f *Finder2D) IsAMatchPoint(x, y int) bool {
+	for _, m := range f.Matches {
+		// TODO: return true if the coordinate is in the area of the match
+		if m.X == x && m.Y == y {
+			return true
+		}
+	}
+	return false
+}
+
+// IsInMatchArea return true if the coordinate is in the area of the match
+func (f *Finder2D) IsInMatchArea(x, y int) bool {
+	for _, m := range f.Matches {
+		if (m.X <= x && x <= m.X+f.Target.maxX) && (m.Y <= y && y <= m.Y+f.Target.maxY) {
+			return true
+		}
+	}
+	return false
+}
+
+func (f *Finder2D) String() string {
+	var b bytes.Buffer
+	for y := 0; y < f.Source.maxY; y++ {
+		for x := 0; x < f.Source.maxX; x++ {
+			o := uno
+			z := cero
+			if f.IsInMatchArea(x, y) {
+				o = unoMatch
+				z = ceroMatch
+			}
+			switch f.Source.Content[y][x] {
+			case 0:
+				b.WriteString(z)
+			case 1:
+				b.WriteString(o)
+			}
+		}
+		b.WriteString("\n")
+	}
 	return b.String()
 }
 
@@ -120,4 +172,80 @@ func (f *Finder2D) SearchSimple() {
 			}
 		}
 	}
+
+	f.Matches = reduceMatches(f.Matches)
+}
+
+func around(m Match, ms []Match, d int) bool {
+	for _, m1 := range ms {
+		dx := m1.X - m.X
+		dy := m1.Y - m.Y
+		if (dx >= -d && dx <= d) && (dy >= -d && dy <= d) {
+			return true
+		}
+	}
+	return false
+}
+
+func bestMatch(matches []Match) Match {
+	var higherP float64
+	var bestMatch Match
+
+	for _, m := range matches {
+		if m.Percentage >= higherP {
+			bestMatch = m
+			higherP = m.Percentage
+		}
+	}
+
+	return bestMatch
+}
+
+func groupMatchesNear(m Match, initialUniv []Match) (group []Match, universe []Match) {
+	univ := initialUniv
+	var mov int
+	group = []Match{m}
+
+	for {
+		newUniv := []Match{}
+		for _, mi := range univ {
+			if around(mi, group, MinDelta) {
+				group = append(group, mi)
+				mov++
+			} else {
+				newUniv = append(newUniv, mi)
+			}
+		}
+		univ = newUniv
+		if mov == 0 {
+			break
+		}
+		mov = 0
+	}
+
+	return group, univ
+}
+
+func reduceMatches(matches []Match) []Match {
+	retMatches := []Match{}
+	if len(matches) == 0 {
+		return retMatches
+	}
+
+	for {
+		var matchGroup []Match
+
+		m := matches[0]
+		matches = matches[1:]
+
+		matchGroup, matches = groupMatchesNear(m, matches)
+
+		bestM := bestMatch(matchGroup)
+		retMatches = append(retMatches, bestM)
+
+		if len(matches) == 0 {
+			break
+		}
+	}
+	return retMatches
 }
