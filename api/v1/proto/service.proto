@@ -1,0 +1,92 @@
+syntax = "proto3";
+
+package finder2d.v1;
+
+import "google/api/annotations.proto";
+import "protoc-gen-swagger/options/annotations.proto";
+
+option go_package = "v1";
+
+option (grpc.gateway.protoc_gen_swagger.options.openapiv2_swagger) = {
+	info: {
+		title: "Finder2D Service";
+		version: "1.0";
+		contact: {
+			name: "Finder2D";
+			url: "https://github.com/johandry/finder2d";
+			email: "johandry@gmail.com";
+    };
+  };
+  external_docs: {
+		url: "https://github.com/johandry/finder2d/blob/master/README.md"
+		description: "Finder2D Documentation";
+	};
+  schemes: HTTP;
+  // schemes: HTTPS;
+  consumes: "application/json";
+  produces: "application/json";
+  responses: {
+		key: "404";
+		value: {
+			description: "Returned when the target matrix is not found.";
+			schema: {
+				json_schema: {
+					type: STRING;
+				}
+			}
+		}
+	}
+  responses: {
+	  key: "400";
+	  value: {
+		  description: "Returned when a request is invalid or missing parameters";
+	  }
+  }
+};
+
+service Finder2D {
+  rpc GetMatrix(GetMatrixRequest) returns (GetMatrixResponse) {
+		option (google.api.http) = {
+			get: "/api/v1/matrixes/{name}"
+		};
+  }
+  
+	rpc LoadMatrix(LoadMatrixRequest) returns (LoadMatrixResponse) {
+		option (google.api.http) = {
+			post: "/api/v1/matrixes/{name}"
+			body: "*"
+		};
+	}
+}
+
+enum MatrixName {
+  SOURCE = 0;
+  TARGET = 1;
+}
+
+message Matrix {
+  int32 width = 3;
+  int32 height = 4;
+  string content = 5;
+}
+
+message GetMatrixRequest {
+  string api = 1;
+  MatrixName name = 2;
+}
+
+message GetMatrixResponse {
+  string api = 1;
+  MatrixName name = 2;
+  Matrix matrix = 3;
+}
+
+message LoadMatrixRequest {
+  string api = 1;
+  MatrixName name = 2;
+  Matrix matrix = 3;
+}
+
+message LoadMatrixResponse {
+  string api = 1;
+}

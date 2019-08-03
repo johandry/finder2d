@@ -1,0 +1,177 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Finder2D Service",
+    "version": "1.0",
+    "contact": {
+      "name": "Finder2D",
+      "url": "https://github.com/johandry/finder2d",
+      "email": "johandry@gmail.com"
+    }
+  },
+  "schemes": [
+    "http"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/api/v1/matrixes/{name}": {
+      "get": {
+        "operationId": "GetMatrix",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetMatrixResponse"
+            }
+          },
+          "400": {
+            "description": "Returned when a request is invalid or missing parameters",
+            "schema": {}
+          },
+          "404": {
+            "description": "Returned when the target matrix is not found.",
+            "schema": {
+              "format": "string"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "SOURCE",
+              "TARGET"
+            ]
+          },
+          {
+            "name": "api",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Finder2D"
+        ]
+      },
+      "post": {
+        "operationId": "LoadMatrix",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1LoadMatrixResponse"
+            }
+          },
+          "400": {
+            "description": "Returned when a request is invalid or missing parameters",
+            "schema": {}
+          },
+          "404": {
+            "description": "Returned when the target matrix is not found.",
+            "schema": {
+              "format": "string"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "SOURCE",
+              "TARGET"
+            ]
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1LoadMatrixRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Finder2D"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "v1GetMatrixResponse": {
+      "type": "object",
+      "properties": {
+        "api": {
+          "type": "string"
+        },
+        "name": {
+          "$ref": "#/definitions/v1MatrixName"
+        },
+        "matrix": {
+          "$ref": "#/definitions/v1Matrix"
+        }
+      }
+    },
+    "v1LoadMatrixRequest": {
+      "type": "object",
+      "properties": {
+        "api": {
+          "type": "string"
+        },
+        "name": {
+          "$ref": "#/definitions/v1MatrixName"
+        },
+        "matrix": {
+          "$ref": "#/definitions/v1Matrix"
+        }
+      }
+    },
+    "v1LoadMatrixResponse": {
+      "type": "object",
+      "properties": {
+        "api": {
+          "type": "string"
+        }
+      }
+    },
+    "v1Matrix": {
+      "type": "object",
+      "properties": {
+        "width": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "height": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "content": {
+          "type": "string"
+        }
+      }
+    },
+    "v1MatrixName": {
+      "type": "string",
+      "enum": [
+        "SOURCE",
+        "TARGET"
+      ],
+      "default": "SOURCE"
+    }
+  },
+  "externalDocs": {
+    "description": "Finder2D Documentation",
+    "url": "https://github.com/johandry/finder2d/blob/master/README.md"
+  }
+}
