@@ -1,6 +1,6 @@
 # Finder 2D
 
-Finder 2D is a package to recognize or find a target string or pattern in a source string. Both, the pattern and the source string, are bidimensional arrays.
+Finder 2D is a package to recognize or find a target string or pattern in a source string. Both, the pattern and the source string, are bi-dimensional arrays.
 
 This package is created to solve the following exercise:
 
@@ -57,16 +57,13 @@ make docker-build
 make docker-run
 ```
 
-## How to use (CLI mode)
+## How to use `finder2d` in CLI mode
 
-Build and execute:
+After download or build `finder2d` you can execute the binary or run the container. Examples:
 
 ```bash
-make build
 ./bin/finder2d --frame test_data/image_with_cats.txt --image test_data/perfect_cat_image.txt
 ```
-
-Or using Docker:
 
 ```bash
 docker run --rm \
@@ -75,3 +72,39 @@ docker run --rm \
     --frame /data/image_with_cats.txt \
     --image /data/perfect_cat_image.txt
 ```
+
+Using the docker container requires to mount a volume with the source and target matrix files, to be used with the parameters `--frame` and `--image`.
+
+The `finder2d` has the following parameters:
+
+- `--frame`: (required) is the source matrix file. The given image or target matrix will be searched into the frame or source matrix.
+- `--image`: (required) is the target matrix file.
+- `--on`: is the character in the given matrixes to identify a one or on bit of the image. The default value is `+`.
+- `--off`: is the character in the given matrixes to identify a one or on bit of the image. The default value is an space ` `.
+- `-p`: is the matching percentage. The finder will find multiple matches, some of them are noise. The higher the percentage the more the image is equal to the found match. The default value is `50.0`. With the examples matrix the best results are with percentages **61%**
+- `-d`: is the matches blurry delta. Read below the Delta section. The default delta value is **1**
+
+For more information use `--help`
+
+### Delta
+
+The finder finds multiple matches for the same image/patter found, all these matches are near by 1, 2, or more bits. Just like a blurry image, all the blurry images are one next to the other in multiple directions.
+
+The delta value is used to reduce all these blurry images to one. The higher the delta, the less blurry images will found or, in the best case, all these blurry images will be reduced to one.
+
+However, in the source matrix may be multiple images/patters near that may be falsely identified as blurry images. If this is the case, you need to reduce the delta, trying to not identify them as blurry images and identify them as just images one near to the other.
+
+Using the default matching percentage (50%) the best results are found with **delta = 5**. Read the following table with the minimum percentage for possible delta values:
+
+| Delta | Minimum Percentage |
+| ----- | ----------- |
+| 6     | 48%            |
+| 5     | 48%            |
+| 4     | 51%            |
+| 3     | 51%            |
+| 2     | 54%            |
+| 1     | 61%            |
+
+The maximum percentage is **96%** for any delta.
+
+## How to use `finder2d` in server mode
