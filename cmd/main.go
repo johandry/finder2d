@@ -14,12 +14,14 @@ func main() {
 	var frameFileName, imageFileName string
 	var zero, one string
 	var percentage float64
+	var delta int
 
-	flag.StringVar(&frameFileName, "frame", "", "frame file")
-	flag.StringVar(&imageFileName, "image", "", "image file")
-	flag.StringVar(&zero, "off", " ", "matrix character that represents a zero or off")
-	flag.StringVar(&one, "on", "+", "matrix character that represents a one or on")
-	flag.Float64Var(&percentage, "p", 50.0, "match percentage")
+	flag.StringVar(&frameFileName, "frame", "", "frame or source matrix file (required)")
+	flag.StringVar(&imageFileName, "image", "", "image or target matrix file (required)")
+	flag.StringVar(&zero, "off", " ", "matrix character that represents a zero or off bit")
+	flag.StringVar(&one, "on", "+", "matrix character that represents a one or on bit")
+	flag.Float64Var(&percentage, "p", 50.0, "matching percentage")
+	flag.IntVar(&delta, "d", 1, "matches blurry delta, the higher it is the less blurry patterns will find")
 	flag.Parse()
 
 	if len(frameFileName) == 0 {
@@ -38,7 +40,7 @@ func main() {
 		log.Fatalf("fail to open the image file %q. %s", imageFileName, err)
 	}
 
-	f := finder2d.New([]byte(one)[0], []byte(zero)[0], percentage)
+	f := finder2d.New([]byte(one)[0], []byte(zero)[0], percentage, delta)
 	if err := f.LoadSource(frameFile); err != nil {
 		log.Fatalf("fail to load the frame file %q. %s", frameFileName, err)
 	}

@@ -12,17 +12,17 @@ const DefaultMinMatchPercentage float64 = 50.0
 
 // MinDelta minimum difference between coordinates of group of matches to be
 // considered the same image
-const MinDelta = 3
+const MinDelta = 1
 
-const (
-	unoMatch  = `🔸`
-	ceroMatch = `◼️️`
+var (
+	unoMatch  = "\033[47;1m \033[0m" // Bright Blue
+	ceroMatch = "\033[45;1m \033[0m" // Bright Black
 )
 
 // Default values for a one and a zero in a matrix
-const (
-	DefaultOne  = `+`
-	DefaultZero = ` `
+var (
+	DefaultOne  = []byte(`+`)[0]
+	DefaultZero = []byte(` `)[0]
 )
 
 // Match represents the coordinate the target matrix was found in the source
@@ -39,6 +39,7 @@ type Finder2D struct {
 	one, zero  byte
 	Matches    []Match
 	Percentage float64
+	Delta      int
 }
 
 func (m *Match) String() string {
@@ -46,22 +47,27 @@ func (m *Match) String() string {
 }
 
 // New create an empty Finder 2D
-func New(one, zero byte, percentage float64) *Finder2D {
+func New(one, zero byte, percentage float64, delta int) *Finder2D {
 	if percentage == 0 {
 		percentage = DefaultMinMatchPercentage
 	}
+	if delta == 0 {
+		delta = MinDelta
+	}
 	// if both are `0`
 	if one+zero == 0 {
-		one = []byte(DefaultOne)[0]
-		zero = []byte(DefaultZero)[0]
+		one = DefaultOne
+		zero = DefaultZero
 	}
 	return &Finder2D{
 		one:        one,
 		zero:       zero,
 		Percentage: percentage,
+		Delta:      delta,
 	}
 }
 
+// PrintMatches print the found matches of the target matrix in the source matrix
 func (f *Finder2D) PrintMatches() string {
 	var b bytes.Buffer
 	b.WriteString("[")
@@ -173,7 +179,7 @@ func (f *Finder2D) SearchSimple() {
 		}
 	}
 
-	f.Matches = reduceMatches(f.Matches)
+	f.Matches = reduceMatches(f.Matches, f.Delta)
 }
 
 func around(m Match, ms []Match, d int) bool {
@@ -201,7 +207,7 @@ func bestMatch(matches []Match) Match {
 	return bestMatch
 }
 
-func groupMatchesNear(m Match, initialUniv []Match) (group []Match, universe []Match) {
+func groupMatchesNear(m Match, initialUniv []Match, delta int) (group []Match, universe []Match) {
 	univ := initialUniv
 	var mov int
 	group = []Match{m}
@@ -209,7 +215,7 @@ func groupMatchesNear(m Match, initialUniv []Match) (group []Match, universe []M
 	for {
 		newUniv := []Match{}
 		for _, mi := range univ {
-			if around(mi, group, MinDelta) {
+			if around(mi, group, delta) {
 				group = append(group, mi)
 				mov++
 			} else {
@@ -226,7 +232,7 @@ func groupMatchesNear(m Match, initialUniv []Match) (group []Match, universe []M
 	return group, univ
 }
 
-func reduceMatches(matches []Match) []Match {
+func reduceMatches(matches []Match, delta int) []Match {
 	retMatches := []Match{}
 	if len(matches) == 0 {
 		return retMatches
@@ -238,7 +244,7 @@ func reduceMatches(matches []Match) []Match {
 		m := matches[0]
 		matches = matches[1:]
 
-		matchGroup, matches = groupMatchesNear(m, matches)
+		matchGroup, matches = groupMatchesNear(m, matches, delta)
 
 		bestM := bestMatch(matchGroup)
 		retMatches = append(retMatches, bestM)

@@ -65,7 +65,7 @@ func TestMatrix_Sample(t *testing.T) {
 		{"larger sample", args{15, 15, 10, 10}, nil},
 		{"2x2", args{15, 15, 2, 2}, &Matrix{Content: [][]int{{1, 1}, {1, 1}}, maxX: 2, maxY: 2}},
 		{"3x3", args{1, 2, 3, 3}, &Matrix{Content: [][]int{{1, 0, 1}, {1, 1, 1}, {0, 1, 1}}, maxX: 3, maxY: 3}},
-		{"4x4", args{0, 16, 4, 4}, &Matrix{Content: [][]int{{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}, maxX: 4, maxY: 4}},
+		{"4x4", args{0, 16, 4, 4}, &Matrix{Content: [][]int{{1, 1, 0, 0}, {1, 0, 1, 0}, {1, 0, 0, 1}, {1, 0, 0, 0}}, maxX: 4, maxY: 4}},
 	}
 	m, err := LoadMatrix(bytes.NewBufferString(string(testMatrixData[0])), testMatrixOne, testMatrixZero)
 	if err != nil {
@@ -91,6 +91,7 @@ func TestMatrix_Compare(t *testing.T) {
 		{"same", testMatrixData[0], testMatrixData[0], 100.0, false},
 		{"diff", testMatrixData[0], testMatrixData[1], 94.0, false},
 		{"diff size", testMatrixData[0], testMatrixData[2], 0, true},
+		{"lot of spaces", testMatrixData[2], testMatrixData[3], 40.0, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -115,8 +116,8 @@ func TestMatrix_Compare(t *testing.T) {
 	}
 }
 
-var testMatrixOne = []byte(DefaultOne)[0]
-var testMatrixZero = []byte(DefaultZero)[0]
+var testMatrixOne = DefaultOne
+var testMatrixZero = DefaultZero
 var testMatrixData = [][]byte{
 	[]byte(`++++++++++++++ +++++
 +++++++++++++++++++ 
@@ -165,4 +166,10 @@ var testMatrixData = [][]byte{
 +  ++
 ++++ 
 + +++`),
+
+	[]byte(`    +
++    
++    
++    
++    `),
 }

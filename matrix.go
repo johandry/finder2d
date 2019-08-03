@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	uno  = `◻️`
-	cero = `◼️️`
+	uno  = "\033[44m \033[0m" // Blue // `◻️`
+	cero = "\033[40m \033[0m" // Black // `◼️️`
 )
 
 // Matrix represents a 2D array
@@ -141,7 +141,7 @@ func (m *Matrix) Compare(m1 *Matrix) (float64, error) {
 	var same float64
 	for y := 0; y < m.maxY; y++ {
 		for x := 0; x < m.maxY; x++ {
-			if m.Content[y][x] == m1.Content[y][x] {
+			if m.Content[y][x] == m1.Content[y][x] { // && (m.Content[y][x] == 1) {
 				same++
 			}
 		}
