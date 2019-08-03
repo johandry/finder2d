@@ -146,6 +146,29 @@ To list all the available gRPC methods from the Finder2D service, use:
 grpcurl -plaintext localhost:8080 list finder2d.v1.Finder2D
 ```
 
+To access the Swagger API definition open [localhost:8080/api/v1/swagger/finder2d.json](http://localhost:8080/api/v1/swagger/finder2d.json) or use the Swagger Docker container to see it with Swagger UI:
+
+```bash
+docker run --rm \
+  -p 80:8080 \
+  -e API_URL=http://localhost:8080/api/v1/swagger/finder2d.json \
+  swaggerapi/swagger-ui
+```
+
+Then navigate to [localhost](http://localhost).
+
+You can also import the Swagger into Postman for a better API interaction and testing.
+
+## TODO
+
+- [ ] Implement the LoadMatrix gRPC method
+- [ ] Define and implement the Search gRPC method
+- [ ] Create the Docker Compose for the services
+- [ ] Create the Kubernetes Manifest for the services
+- [ ] Allow to load multimple targets
+- [ ] Create a DB service to store the matrixes
+- [ ] Build a UI
+
 ## Other algorithms to improve the search
 
 **2D Convolution**:
