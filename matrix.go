@@ -91,14 +91,20 @@ func (m *Matrix) Size() (int, int) {
 }
 
 func (m *Matrix) String() string {
+	return m.Sprintf(cero, uno)
+}
+
+// Sprintf returns a string representing the matrix but using the given `one`,
+// `zero` strings to represent the one and zero values
+func (m *Matrix) Sprintf(zero, one string) string {
 	var b bytes.Buffer
 	for _, row := range m.Content {
 		for _, v := range row {
 			switch v {
 			case 0:
-				b.WriteString(cero)
+				b.WriteString(zero)
 			case 1:
-				b.WriteString(uno)
+				b.WriteString(one)
 			}
 		}
 		b.WriteString("\n")

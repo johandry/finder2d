@@ -84,6 +84,11 @@ func (f *Finder2D) Stringf(format string) string {
 	}
 }
 
+// Values returns the values for the off and on bits
+func (f *Finder2D) Values() (byte, byte) {
+	return f.zero, f.one
+}
+
 // IsAMatchPoint returns true if the coordinate is a match coordinate
 func (f *Finder2D) IsAMatchPoint(x, y int) bool {
 	for _, m := range f.Matches {

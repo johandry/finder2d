@@ -2,15 +2,32 @@ package v1
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/johandry/finder2d"
 	apiv1 "github.com/johandry/finder2d/api/v1"
 )
 
 // GetMatrix implement the API method from the generated protobuf
 func (s *Finder2DService) GetMatrix(ctx context.Context, req *apiv1.GetMatrixRequest) (*apiv1.GetMatrixResponse, error) {
-	m := s.finder.Source
+	if err := s.checkAPIVersion(req.Api); err != nil {
+		return nil, err
+	}
 
-	content := m.String()
+	var m *finder2d.Matrix
+	switch req.Name {
+	case apiv1.MatrixName_SOURCE:
+		m = s.finder.Source
+	case apiv1.MatrixName_TARGET:
+		m = s.finder.Target
+	}
+
+	if m == nil {
+		return nil, fmt.Errorf("matrix not found, load the matrix")
+	}
+
+	z, o := s.finder.Values()
+	content := m.Sprintf(string([]byte{z}), string([]byte{o}))
 	w, h := m.Size()
 
 	matrix := &apiv1.Matrix{
