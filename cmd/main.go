@@ -2,62 +2,50 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
-	"os"
 	"strings"
 
-	"github.com/johandry/finder2d"
+	"github.com/johandry/finder2d/pkg/cli"
+	"github.com/johandry/finder2d/pkg/server"
 )
 
 func main() {
-	var frameFileName, imageFileName string
+	var sourceFileName, targetFileName string
 	var zero, one string
 	var percentage float64
 	var delta int
+	var output string
+	var serve bool
+	var port string
 
-	flag.StringVar(&frameFileName, "frame", "", "frame or source matrix file (required)")
-	flag.StringVar(&imageFileName, "image", "", "image or target matrix file (required)")
+	flag.StringVar(&sourceFileName, "source", "", "source or source matrix file (required)")
+	flag.StringVar(&targetFileName, "target", "", "target or target matrix file (required)")
 	flag.StringVar(&zero, "off", " ", "matrix character that represents a zero or off bit")
 	flag.StringVar(&one, "on", "+", "matrix character that represents a one or on bit")
 	flag.Float64Var(&percentage, "p", 50.0, "matching percentage")
 	flag.IntVar(&delta, "d", 1, "matches blurry delta, the higher it is the less blurry patterns will find")
+	flag.StringVar(&output, "o", "json", "output format. Availabe formats are 'text' and 'json'")
+	flag.BoolVar(&serve, "server", false, "start the server")
+	flag.StringVar(&port, "port", "8080", "port to start the server")
 	flag.Parse()
 
-	if len(frameFileName) == 0 {
-		log.Fatalf("frame file is required. Use the flag '--frame'")
+	if len(sourceFileName) == 0 {
+		log.Fatalf("source file is required. Use the flag '--source'")
 	}
-	if len(imageFileName) == 0 {
-		log.Fatalf("image file is required. Use the flag '--image'")
+	if len(targetFileName) == 0 && !serve {
+		log.Fatalf("target file is required. Use the flag '--target'")
 	}
-
-	frameFile, err := os.Open(frameFileName)
-	if err != nil {
-		log.Fatalf("fail to open the frame file %q. %s", frameFileName, err)
-	}
-	imageFile, err := os.Open(imageFileName)
-	if err != nil {
-		log.Fatalf("fail to open the image file %q. %s", imageFileName, err)
+	switch output {
+	case "", "text", "matrix", "json":
+	default:
+		log.Fatalf("Unknown output format %q. Available options are: 'json' and 'text' or 'matrix'", output)
 	}
 
-	f := finder2d.New([]byte(one)[0], []byte(zero)[0], percentage, delta)
-	if err := f.LoadSource(frameFile); err != nil {
-		log.Fatalf("fail to load the frame file %q. %s", frameFileName, err)
+	if !serve {
+		if err := cli.Exec(sourceFileName, targetFileName, zero, one, percentage, delta, strings.ToLower(output)); err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		server.Serve(port, sourceFileName, zero, one)
 	}
-	if err := f.LoadTarget(imageFile); err != nil {
-		log.Fatalf("fail to load the image file %q. %s", frameFileName, err)
-	}
-
-	x, y := f.Source.Size()
-	fmt.Printf("Frame (%dx%d): \n%s\n", x, y, f.Source)
-
-	x, y = f.Target.Size()
-	fmt.Printf("Image (%dx%d): \n%s\n", x, y, f.Target)
-
-	fmt.Println("Finding matches ...")
-	f.SearchSimple()
-
-	n := len(f.Matches)
-
-	fmt.Printf("Matches (%d): \n%s\n", n, strings.Replace(f.String(), "),(", ")\n(", -1))
 }
