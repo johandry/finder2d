@@ -25,7 +25,7 @@ func main() {
 	flag.Float64Var(&percentage, "p", 50.0, "matching percentage")
 	flag.IntVar(&delta, "d", 1, "matches blurry delta, the higher it is the less blurry patterns will find")
 	flag.StringVar(&output, "o", "json", "output format. Availabe formats are 'text' and 'json'")
-	flag.BoolVar(&serve, "server", false, "start the server")
+	flag.BoolVar(&serve, "serve", false, "start the server mode to expose the gRPC and REST/HTTP API")
 	flag.StringVar(&port, "port", "8080", "port to start the server")
 	flag.Parse()
 

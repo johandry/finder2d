@@ -27,7 +27,7 @@ therefore, you have to deal with certain possibilities what you have found is th
 correct answer.
 ```
 
-## How to get `finder2d`
+## Installing `finder2d`
 
 To get the binary use `go get`:
 
@@ -57,30 +57,34 @@ make docker-build
 make docker-run
 ```
 
-## How to use `finder2d` in CLI mode
+## Running `finder2d` in CLI mode
 
 After download or build `finder2d` you can execute the binary or run the container. Examples:
 
 ```bash
-./bin/finder2d --frame test_data/image_with_cats.txt --image test_data/perfect_cat_image.txt
+./bin/finder2d \
+  --source test_data/image_with_cats.txt \
+  --target test_data/perfect_cat_image.txt \
+  -p 80
 ```
 
 ```bash
 docker run --rm \
     -v $(pwd)/test_data:/data \
     johandry/finder2d \
-    --frame /data/image_with_cats.txt \
-    --image /data/perfect_cat_image.txt
+    --source /data/image_with_cats.txt \
+    --target /data/perfect_cat_image.txt \
+    -p 80
 ```
 
-Using the docker container requires to mount a volume with the source and target matrix files, to be used with the parameters `--frame` and `--image`.
+Using the docker container requires to mount a volume with the source and target matrix files, to be used with the parameters `--source` and `--image`.
 
 The `finder2d` has the following parameters:
 
-- `--frame`: (required) is the source matrix file. The given image or target matrix will be searched into the frame or source matrix.
-- `--image`: (required) is the target matrix file.
+- `--source`: (required) is the source matrix file. The given image or target matrix will be searched into the frame or source matrix.
+- `--target`: (required) is the target matrix file.
 - `--on`: is the character in the given matrixes to identify a one or on bit of the image. The default value is `+`.
-- `--off`: is the character in the given matrixes to identify a one or on bit of the image. The default value is an space ` `.
+- `--off`: is the character in the given matrixes to identify a one or on bit of the image. The default value is an space character.
 - `-p`: is the matching percentage. The finder will find multiple matches, some of them are noise. The higher the percentage the more the image is equal to the found match. The default value is `50.0`. With the examples matrix the best results are with percentages **61%**
 - `-d`: is the matches blurry delta. Read below the Delta section. The default delta value is **1**
 
@@ -88,7 +92,7 @@ For more information use `--help`
 
 ### Delta
 
-The finder finds multiple matches for the same image/patter found, all these matches are near by 1, 2, or more bits. Just like a blurry image, all the blurry images are one next to the other in multiple directions.
+The finder finds multiple matches for the same image/pattern found, all these matches are near by 1, 2, or more bits. Just like a blurry image, all the blurry images are one next to the other in multiple directions.
 
 The delta value is used to reduce all these blurry images to one. The higher the delta, the less blurry images will found or, in the best case, all these blurry images will be reduced to one.
 
@@ -107,4 +111,56 @@ Using the default matching percentage (50%) the best results are found with **de
 
 The maximum percentage is **96%** for any delta.
 
-## How to use `finder2d` in server mode
+## Running `finder2d` in server mode
+
+Execute `finder2d` either as a binary or in a container with the flag `--serve`, providing the frame or source matrix file with the flag `—source`.
+
+```bash
+./bin/finder2d --source test_data/image_with_cats.txt --serve
+```
+
+```bash
+docker run --rm \
+    -v $(pwd)/test_data:/data \
+    -p 8080:8080 \
+    johandry/finder2d \
+    --source /data/image_with_cats.txt \
+    --serve
+```
+
+In a different terminal access the server either to the gRPC or REST/HTTP API using `grpcurl` or `curl` with `jq` for better JSON formatting:
+
+```bash
+curl -s "http://localhost:8080/api/v1/matrixes/0" | jq
+```
+
+```bash
+grpcurl -plaintext -d '{"name": 0}' localhost:8080 finder2d.v1.Finder2D.GetMatrix
+```
+
+To install `grpcurl` or `jq` on MacOS execute `brew install grpcurl jq`.
+
+To list all the available gRPC methods from the Finder2D service, use:
+
+```bash
+grpcurl -plaintext localhost:8080 list finder2d.v1.Finder2D
+```
+
+## Other algorithms to improve the search
+
+**2D Convolution**:
+
+- [Convolution Theorem](https://en.wikipedia.org/wiki/Convolution_theorem)
+- [Convolution 2D Example](http://www.songho.ca/dsp/convolution/convolution2d_example.html)
+- [Two Dimensional Convolution in Image Processing](https://www.allaboutcircuits.com/technical-articles/two-dimensional-convolution-in-image-processing/)
+- [Understanding Convolutions for Deep Learning](https://towardsdatascience.com/intuitively-understanding-convolutions-for-deep-learning-1f6f42faee1)
+- [Efficient 2D Approximate Matching of Non-rectangular Figures](https://www.cs.rutgers.edu/~farach/pubs/HalfRec.pdf)
+
+**Rabin–Karp algorithm**:
+
+- [Rabin–Karp Algorithm](https://en.wikipedia.org/wiki/Rabin–Karp_algorithm)
+- [Rabin Fingerprint](https://en.wikipedia.org/wiki/Rabin_fingerprint)
+
+**Boyer–Moore algorithm**:
+
+- [Boyer–Moore String Search Algorithm](https://en.wikipedia.org/wiki/Boyer–Moore_string-search_algorithm)

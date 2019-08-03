@@ -25,14 +25,6 @@ mod:
 docker-build: test
 	docker build -t $(IMG_NAME) .
 
-# run locally the container with the application. Use it just for testing
-docker-run:
-	docker run --rm \
-		-v $(PWD)/test_data:/data \
-		$(IMG_NAME) \
-		--frame /data/image_with_cats.txt \
-		--image /data/perfect_cat_image.txt
-
 # push the built image to the docker registry. Make sure you set the correct user
 docker-push:
 	docker push $(IMG_NAME)
