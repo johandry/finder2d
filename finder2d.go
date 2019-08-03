@@ -2,6 +2,7 @@ package finder2d
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 )
@@ -67,21 +68,20 @@ func New(one, zero byte, percentage float64, delta int) *Finder2D {
 	}
 }
 
-// PrintMatches print the found matches of the target matrix in the source matrix
-func (f *Finder2D) PrintMatches() string {
-	var b bytes.Buffer
-	b.WriteString("[")
-	first := true
-	for _, m := range f.Matches {
-		if first {
-			b.WriteString(m.String())
-			first = false
-		} else {
-			b.WriteString("," + m.String())
-		}
+// String returns the found matches in JSON format
+func (f *Finder2D) String() string {
+	output, _ := json.Marshal(f.Matches)
+	return string(output)
+}
+
+// Stringf return the matches in the requested format
+func (f *Finder2D) Stringf(format string) string {
+	switch format {
+	case "", "text", "matrix":
+		return f.Matrix()
+	default: // json
+		return f.String()
 	}
-	b.WriteString("]")
-	return b.String()
 }
 
 // IsAMatchPoint returns true if the coordinate is a match coordinate
@@ -105,7 +105,8 @@ func (f *Finder2D) IsInMatchArea(x, y int) bool {
 	return false
 }
 
-func (f *Finder2D) String() string {
+// Matrix return the matches in the matrix
+func (f *Finder2D) Matrix() string {
 	var b bytes.Buffer
 	for y := 0; y < f.Source.maxY; y++ {
 		for x := 0; x < f.Source.maxX; x++ {
