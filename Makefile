@@ -1,9 +1,13 @@
 APP_NAME = finder2d
-IMG_NAME = johandry/$(APP_NAME)
+DOKR_USR = johandry
+
+IMG_NAME = $(DOKR_USR)/$(APP_NAME)
 
 GO111MODULE = on
 
 default: test build
+
+docker: docker-build docker-push
 
 build:
 	go build -o bin/$(APP_NAME) cmd/main.go
@@ -25,6 +29,8 @@ docker-run:
 		--frame /data/image_with_cats.txt \
 		--image /data/perfect_cat_image.txt
 
+docker-push:
+	docker push $(IMG_NAME)
 
 ## Do not use the following rules unless you know what you are doing
 
