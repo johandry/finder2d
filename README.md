@@ -159,9 +159,116 @@ Then navigate to [localhost](http://localhost).
 
 You can also import the Swagger into Postman for a better API interaction and testing.
 
+## API version 1
+
+### GetMatrix
+
+The gRPC method `GetMatrix` is to request the frame or source matrix and the image or target matrix. The frame is identified by a `0` and the image by a `1`. The received object has the matrix content and size.
+
+The REST/HTTP route is `/api/v1/matrixes/{name}` with the HTTP method `GET`.
+
+Using `curl` and `jq`:
+
+```bash
+# Requesting the frame
+curl -s "http://localhost:8080/api/v1/matrixes/0" | jq
+# Requesting the image
+curl -s "http://localhost:8080/api/v1/matrixes/1" | jq
+```
+
+Using `grpcurl`:
+
+```bash
+# Requesting the frame
+grpcurl -plaintext -d '{"name": 0}' localhost:8080 finder2d.v1.Finder2D.GetMatrix
+# Requesting the image
+grpcurl -plaintext -d '{"name": 1}' localhost:8080 finder2d.v1.Finder2D.GetMatrix
+```
+
+Sample Output:
+
+```json
+{
+  "api": "v1",
+  "name": "SOURCE",
+  "matrix": {
+    "width": 15,
+    "height": 15,
+    "content": "+             +\n+++         +++\n ++++++    .......        \n"
+  }
+}
+```
+
+### LoadMatrix
+
+The gRPC method `LoadMatrix` is to load into the Finder2D the frame or source matrix and the image or target matrix. 
+
+The request is a JSON object with the matrix type (`"name"`) and the matrix object only with the content (`"matrix": {"content": "...."}`). The frame is identified by a `0` and the image by a `1`. 
+
+The responce only contain the API version number, if there was an error it will be in the response.
+
+The REST/HTTP route is `/api/v1/matrixes/{name}` with the HTTP method `POST`. 
+
+Using `curl` and `jq`:
+
+```bash
+# Load the content into an environment variable, replacing '\n' for '\\n'
+img=$(awk '{printf "%s\\n" , $0}' test_data/perfect_cat_image.txt)
+
+# Loading the frame
+curl -s \
+  -d '{"api": "v1", "name": 0, "matrix": {"content": "'$img'"}}' \
+  -H "Content-Type: application/json" \
+  -X POST  "http://localhost:8080/api/v1/matrixes/0" | jq
+
+# Loading the image
+curl -s \
+  -d '{"api": "v1", "name": 1, "matrix": {"content": "'$img'"}}' \
+  -H "Content-Type: application/json" \
+  -X POST  "http://localhost:8080/api/v1/matrixes/1" | jq
+```
+
+Using `grpcurl`:
+
+```bash
+# Load the content into an environment variable, replacing '\n' for '\\n'
+img=$(awk '{printf "%s\\n" , $0}' test_data/image_with_cats.txt)
+
+# Loading the frame
+grpcurl -plaintext \
+  -d '{"api": "v1", "name": 0, "matrix": {"content": "'$img'"}}' \
+  localhost:8080 finder2d.v1.Finder2D.LoadMatrix
+
+# Loading the image
+grpcurl -plaintext \
+  -d '{"api": "v1", "name": 1, "matrix": {"content": "'$img'"}}' \
+  localhost:8080 finder2d.v1.Finder2D.LoadMatrix
+```
+
+Sample Output:
+
+```json
+{
+  "api": "v1"
+}
+```
+
+Or an error, in this example the `\n` was not replaced by `\\n`:
+
+```bash
+{
+  "error": "invalid character '\\n' in string literal",
+  "message": "invalid character '\\n' in string literal",
+  "code": 3,
+  "details": []
+}
+```
+
+
+
 ## TODO
 
-- [ ] Implement the LoadMatrix gRPC method
+- [x] Implement the LoadMatrix gRPC method
 - [ ] Define and implement the Search gRPC method
 - [ ] Create the Docker Compose for the services
 - [ ] Create the Kubernetes Manifest for the services
