@@ -175,6 +175,10 @@ func (s *Server) Wait() error {
 
 // Stop stops the server running
 func (s *Server) Stop() error {
+	if s.httpServer == nil {
+		return nil
+	}
+
 	timeout := 5 * time.Second
 	log.Printf("[WARN] shutting down Multiplex server in %s seconds...", timeout)
 	ctx, cancel := context.WithTimeout(s.ctx, timeout)
