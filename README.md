@@ -159,6 +159,52 @@ Then navigate to [localhost](http://localhost).
 
 You can also import the Swagger into Postman for a better API interaction and testing.
 
+## Running `finder2d` with Docker Compose
+
+In the project repository there is a `docker-compose.yml` file. This file can be used to start the Finder2D server and the Swagger UI.
+
+Execute the following commands:
+
+```bash
+docker-compose up -d
+docker-compose ps
+```
+
+Navigate to [localhost](http://localhost) to see the Swagger UI or [localhost:8080/api/v1/swagger/finder2d.json](http://localhost:8080/api/v1/swagger/finder2d.json) to read the Swagger JSON API definition.
+
+Execute the commands to access the API using `curl` or `grpcurl` (refer to the [API version 1](#API_version_1) section below). For example:
+
+```bash
+# Load the image
+img=$(awk '{printf "%s\\n" , $0}' test_data/perfect_cat_image.txt)
+grpcurl -plaintext \
+  -d '{"api": "v1", "name": 1, "matrix": {"content": "'$img'"}}' \
+  localhost:8080 finder2d.v1.Finder2D.LoadMatrix
+
+# Search the image in the frame
+grpcurl -plaintext \
+  -d '{"api": "v1", "percentage": 70.5, "delta": 1}' \
+  localhost:8080 finder2d.v1.Finder2D.Search
+
+# Get all the matches
+curl -s "http://localhost:8080/api/v1/matches" | jq
+
+# Get match number 2 and the matrix found
+curl -s "http://localhost:8080/api/v1/matches/1" | jq
+
+# Get the 2nd image found
+curl -s "http://localhost:8080/api/v1/matches/1" | \
+  jq '.matrix.content' | \
+  awk '{gsub(/\\n/,"\n")}1'
+```
+
+When you are done, execute the following commands to destroy the services.
+
+```bash
+docker-compose stop
+docker-compose down
+```
+
 ## API version 1
 
 ### GetMatrix
@@ -403,7 +449,7 @@ Sample Output:
 
 - [x] Implement the LoadMatrix gRPC method
 - [x] Define and implement the Search gRPC method
-- [ ] Create the Docker Compose for the services
+- [x] Create the Docker Compose for the services
 - [ ] Create the Kubernetes Manifest for the services
 - [ ] Allow to load multiple targets
 - [ ] Create a DB service to store the matrixes

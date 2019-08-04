@@ -1,0 +1,16 @@
+version: '3'
+services: 
+  finder2d:
+    build: .
+    image: johandry/finder2d
+    ports: 
+      - "8080:8080"
+    volumes: 
+      - ./test_data:/data
+    command: --source /data/image_with_cats.txt --serve
+  swagger:
+    image: swaggerapi/swagger-ui
+    ports: 
+      - "80:8080"
+    environment: 
+      API_URL: http://localhost:8080/api/v1/swagger/finder2d.json
