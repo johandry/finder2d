@@ -9,7 +9,7 @@ COPY    go.sum .
 RUN     go mod tidy && go mod download
 
 COPY    . .
-RUN     CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /finder2d cmd/main.go
+RUN     CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /finder2d cmd/finder2d/main.go
 
 # Application image
 FROM alpine:3.9 AS application

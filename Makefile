@@ -11,10 +11,10 @@ default: mod test build
 docker: docker-build docker-push
 
 build:
-	go build -o bin/$(APP_NAME) cmd/main.go
+	go build -o bin/$(APP_NAME) cmd/finder2d/main.go
 
 test:
-	go test ./...
+	go test -v ./...
 
 # remove the unused modules and download the missing ones
 mod:
