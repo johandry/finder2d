@@ -7,8 +7,18 @@ import (
 	"github.com/johandry/finder2d"
 )
 
-// Exec executes the CLI mode, loading the matrixes and printing the matches
-func Exec(sourceFileName, targetFileName, zero, one string, percentage float64, delta int, format string) error {
+// Execute executes the CLI mode, loading the matrixes and printing the matches
+func Execute(sourceFileName, targetFileName, zero, one string, percentage float64, delta int, format string) error {
+	switch format {
+	case "", "text", "matrix", "json":
+	default:
+		return fmt.Errorf("unknown output format %q. Available options are: 'json', 'text' or 'matrix'", format)
+	}
+
+	if len(sourceFileName) == 0 {
+		return fmt.Errorf("source file is required")
+	}
+
 	// Open files
 	sourceFile, err := os.Open(sourceFileName)
 	if err != nil {
