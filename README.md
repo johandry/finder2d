@@ -71,22 +71,22 @@ After download or build `finder2d` you can execute the binary or run the contain
 ```bash
 docker run --rm \
     -v $(pwd)/test_data:/data \
+    -e FINDER2D_SOURCE="/data/image_with_cats.txt" \
     johandry/finder2d \
-    --source /data/image_with_cats.txt \
     --target /data/perfect_cat_image.txt \
     -p 80
 ```
 
-Using the docker container requires to mount a volume with the source and target matrix files, to be used with the parameters `--source` and `--image`.
+Using the docker container requires to mount a volume with the source and target matrix files, to be used with the parameters `--source` and `--target` or the environment variables `FINDER2D_SOURCE` and `FINDER2D_TARGET`.
 
-The `finder2d` has the following parameters:
+The `finder2d` has the following parameters in flags or environment variables:
 
-- `--source`: (required) is the source matrix file. The given image or target matrix will be searched into the frame or source matrix.
-- `--target`: (required) is the target matrix file.
-- `--on`: is the character in the given matrixes to identify a one or on bit of the image. The default value is `+`.
-- `--off`: is the character in the given matrixes to identify a one or on bit of the image. The default value is an space character.
-- `-p`: is the matching percentage. The finder will find multiple matches, some of them are noise. The higher the percentage the more the image is equal to the found match. The default value is `50.0`. With the examples matrix the best results are with percentages **61%**
-- `-d`: is the matches blurry delta. Read below the Delta section. The default delta value is **1**
+- `--source` or `FINDER2D_SOURCE`: is the source matrix file. The given image or target matrix will be searched into the frame or source matrix. It's required in CLI mode but not in Service mode.
+- `--target` or `FINDER2D_TARGET`:  is the target matrix file. If set `finder2d` is executed in CLI mode. 
+- `--on` or `FINDER2D_ON`: is the character in the given matrixes to identify a one or on bit of the image. The default value is `+`.
+- `--off` or `FINDER2D_OFF`: is the character in the given matrixes to identify a one or on bit of the image. The default value is an space character.
+- `-p` or `FINDER2D_PERCENTAGE`: is the matching percentage. The finder will find multiple matches, some of them are noise. The higher the percentage the more the image is equal to the found match. The default value is `50.0`. With the examples matrix the best results are with percentages **61%**
+- `-d` or `FINDER2D_DELTA`: is the matches blurry delta. Read below the Delta section. The default delta value is **1**
 
 For more information use `--help`
 
@@ -113,10 +113,10 @@ The maximum percentage is **96%** for any delta.
 
 ## Running `finder2d` in server mode
 
-Execute `finder2d` either as a binary or in a container with the flag `--serve`, providing the frame or source matrix file with the flag `—source`.
+Execute `finder2d` either as a binary or in a container without the flag `--target`. The frame or source matrix file with the flag `--source` is optional, if no source file is provided it has to load it before any other action.
 
 ```bash
-./bin/finder2d --source test_data/image_with_cats.txt --serve
+FINDER2D_SOURCE=/test_data/image_with_cats.txt ./bin/finder2d
 ```
 
 ```bash
@@ -124,8 +124,7 @@ docker run --rm \
     -v $(pwd)/test_data:/data \
     -p 8080:8080 \
     johandry/finder2d \
-    --source /data/image_with_cats.txt \
-    --serve
+    --source /data/image_with_cats.txt
 ```
 
 In a different terminal access the server either to the gRPC or REST/HTTP API using `grpcurl` or `curl` with `jq` for better JSON formatting:
@@ -450,10 +449,18 @@ Sample Output:
 - [x] Implement the LoadMatrix gRPC method
 - [x] Define and implement the Search gRPC method
 - [x] Create the Docker Compose for the services
+- [x] Start server mode by default when the image file is not provided
+- [x] Accept parameter in environment variables as well as with arguments
 - [ ] Create the Kubernetes Manifest for the services
 - [ ] Allow to load multiple targets
 - [ ] Create a DB service to store the matrixes
+- [ ] Make a client `finder2dctl`
+- [ ] Make a client in other language (Python? Ruby?)
 - [ ] Build a UI
+- [ ] Go serverless 
+- [ ] Security: Implement TLS
+- [ ] Security: Implement JWT
+- [ ] CI/CD with Travis and/or others (CircleCI?)
 
 ## Other algorithms to improve the search
 

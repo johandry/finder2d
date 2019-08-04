@@ -7,7 +7,8 @@ services:
       - "8080:8080"
     volumes: 
       - ./test_data:/data
-    command: --source /data/image_with_cats.txt --serve
+    environment: 
+      FINDER2D_SOURCE: /data/image_with_cats.txt
   swagger:
     image: swaggerapi/swagger-ui
     ports: 
