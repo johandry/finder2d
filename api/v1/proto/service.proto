@@ -57,6 +57,25 @@ service Finder2D {
 			body: "*"
 		};
 	}
+
+	rpc Search(SearchRequest) returns (SearchResponse) {
+		option (google.api.http) = {
+			post: "/api/v1/search"
+			body: "*"
+		};
+	}
+
+	rpc GetMatches(GetMatchesRequest) returns (GetMatchesResponse) {
+		option (google.api.http) = {
+			get: "/api/v1/matches"
+		};
+	}
+
+	rpc GetMatch(GetMatchRequest) returns (GetMatchResponse) {
+		option (google.api.http) = {
+			get: "/api/v1/matches/{id}"
+		};
+	}
 }
 
 enum MatrixName {
@@ -68,6 +87,12 @@ message Matrix {
   int32 width = 3;
   int32 height = 4;
   string content = 5;
+}
+
+message Match {
+	int32 x = 1;
+	int32 y = 2;
+	float percentage = 3;
 }
 
 message GetMatrixRequest {
@@ -89,4 +114,35 @@ message LoadMatrixRequest {
 
 message LoadMatrixResponse {
   string api = 1;
+}
+
+message SearchRequest {
+	string api = 1;
+	float percentage = 2;
+	int32 delta = 3;
+}
+
+message SearchResponse {
+	string api = 1;
+	int32 total_matches = 2;
+}
+
+message GetMatchesRequest {
+	string api = 1;
+}
+
+message GetMatchesResponse {
+	string api = 1;
+	repeated Match matches = 2;
+}
+
+message GetMatchRequest {
+	string api = 1;
+	int32 id = 2;
+}
+
+message GetMatchResponse {
+	string api = 1;
+	Match match = 2;
+	Matrix matrix = 3;
 }

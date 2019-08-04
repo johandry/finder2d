@@ -35,7 +35,9 @@ func Exec(sourceFileName, targetFileName, zero, one string, percentage float64, 
 	// fmt.Printf("Target (%dx%d): \n%s\n", x, y, f.Target)
 	// fmt.Println("Finding matches ...")
 
-	f.SearchSimple()
+	if err := f.SearchSimple(); err != nil {
+		return fmt.Errorf("failed to search the target matrix. %s", err)
+	}
 
 	fmt.Println(f.Stringf(format))
 

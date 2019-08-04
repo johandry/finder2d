@@ -25,6 +25,81 @@ var Swagger = []byte(`
     "application/json"
   ],
   "paths": {
+    "/api/v1/matches": {
+      "get": {
+        "operationId": "GetMatches",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetMatchesResponse"
+            }
+          },
+          "400": {
+            "description": "Returned when a request is invalid or missing parameters",
+            "schema": {}
+          },
+          "404": {
+            "description": "Returned when the target matrix is not found.",
+            "schema": {
+              "format": "string"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "api",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Finder2D"
+        ]
+      }
+    },
+    "/api/v1/matches/{id}": {
+      "get": {
+        "operationId": "GetMatch",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetMatchResponse"
+            }
+          },
+          "400": {
+            "description": "Returned when a request is invalid or missing parameters",
+            "schema": {}
+          },
+          "404": {
+            "description": "Returned when the target matrix is not found.",
+            "schema": {
+              "format": "string"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "api",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Finder2D"
+        ]
+      }
+    },
     "/api/v1/matrixes/{name}": {
       "get": {
         "operationId": "GetMatrix",
@@ -112,9 +187,73 @@ var Swagger = []byte(`
           "Finder2D"
         ]
       }
+    },
+    "/api/v1/search": {
+      "post": {
+        "operationId": "Search",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1SearchResponse"
+            }
+          },
+          "400": {
+            "description": "Returned when a request is invalid or missing parameters",
+            "schema": {}
+          },
+          "404": {
+            "description": "Returned when the target matrix is not found.",
+            "schema": {
+              "format": "string"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1SearchRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Finder2D"
+        ]
+      }
     }
   },
   "definitions": {
+    "v1GetMatchResponse": {
+      "type": "object",
+      "properties": {
+        "api": {
+          "type": "string"
+        },
+        "match": {
+          "$ref": "#/definitions/v1Match"
+        },
+        "matrix": {
+          "$ref": "#/definitions/v1Matrix"
+        }
+      }
+    },
+    "v1GetMatchesResponse": {
+      "type": "object",
+      "properties": {
+        "api": {
+          "type": "string"
+        },
+        "matches": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1Match"
+          }
+        }
+      }
+    },
     "v1GetMatrixResponse": {
       "type": "object",
       "properties": {
@@ -151,6 +290,23 @@ var Swagger = []byte(`
         }
       }
     },
+    "v1Match": {
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "y": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "percentage": {
+          "type": "number",
+          "format": "float"
+        }
+      }
+    },
     "v1Matrix": {
       "type": "object",
       "properties": {
@@ -174,6 +330,34 @@ var Swagger = []byte(`
         "TARGET"
       ],
       "default": "SOURCE"
+    },
+    "v1SearchRequest": {
+      "type": "object",
+      "properties": {
+        "api": {
+          "type": "string"
+        },
+        "percentage": {
+          "type": "number",
+          "format": "float"
+        },
+        "delta": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "v1SearchResponse": {
+      "type": "object",
+      "properties": {
+        "api": {
+          "type": "string"
+        },
+        "total_matches": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
     }
   },
   "externalDocs": {

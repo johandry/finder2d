@@ -201,13 +201,13 @@ Sample Output:
 
 ### LoadMatrix
 
-The gRPC method `LoadMatrix` is to load into the Finder2D the frame or source matrix and the image or target matrix. 
+The gRPC method `LoadMatrix` is to load into the Finder2D the frame or source matrix and the image or target matrix.
 
-The request is a JSON object with the matrix type (`"name"`) and the matrix object only with the content (`"matrix": {"content": "...."}`). The frame is identified by a `0` and the image by a `1`. 
+The request is a JSON object with the matrix type (`"name"`) and the matrix object only with the content (`"matrix": {"content": "...."}`). The frame is identified by a `0` and the image by a `1`.
 
-The responce only contain the API version number, if there was an error it will be in the response.
+The response only contain the API version number, if there was an error it will be in the response.
 
-The REST/HTTP route is `/api/v1/matrixes/{name}` with the HTTP method `POST`. 
+The REST/HTTP route is `/api/v1/matrixes/{name}` with the HTTP method `POST`.
 
 Using `curl` and `jq`:
 
@@ -264,15 +264,148 @@ Or an error, in this example the `\n` was not replaced by `\\n`:
 }
 ```
 
+### Search
 
+The gRPC method `Search` is used to search the image or target matrix in the frame or source matrix using the `SearchSimple()` method of the Finder2D.
+
+It's important to remember to load the target matrix before execute a search, otherwise an error will be received.
+
+The request is a JSON object with the percentage (`"percentage"`) and the delta (`"delta"`) values. The response has the total number of matches found (`"total_matches"`).
+
+The REST/HTTP route is `/api/v1/search` with the HTTP method `POST`.
+
+ Using `curl` and `jq`:
+
+```bash
+# Load the image
+img=$(awk '{printf "%s\\n" , $0}' test_data/perfect_cat_image.txt)
+curl -s \
+  -d '{"api": "v1", "name": 1, "matrix": {"content": "'$img'"}}' \
+  -H "Content-Type: application/json" \
+  -X POST  "http://localhost:8080/api/v1/matrixes/1" | jq
+
+# Search the image in the frame
+curl -s \
+  -d '{"api": "v1", "percentage": 70.5, "delta": 1}' \
+  -H "Content-Type: application/json" \
+  -X POST  "http://localhost:8080/api/v1/search" | jq
+```
+
+Using `grpcurl`:
+
+```bash
+# Load the image like in previous example
+grpcurl -plaintext \
+  -d '{"api": "v1", "name": 1, "matrix": {"content": "'$img'"}}' \
+  localhost:8080 finder2d.v1.Finder2D.LoadMatrix
+
+# Search the image in the frame
+grpcurl -plaintext \
+  -d '{"api": "v1", "percentage": 70.5, "delta": 1}'  \
+  localhost:8080 finder2d.v1.Finder2D.Search
+```
+
+Sample Output:
+
+```json
+{
+  "api": "v1",
+  "total_matches": 6
+}
+```
+
+### GetMatches
+
+The gRPC method `GetMatches` is used retrieve all the matches found from a previous search. This method will return an empty list if the search is not done before.
+
+The request is a JSON object only with the API version. The response is a JSON object with an array/list of matches (`"matches"`). Each Match is a JSON object with the coordinates (`"x"`, `"y"`) and the matching percentage (`"percentage"`).
+
+The REST/HTTP route is `/api/v1/matches` with the HTTP method `GET`.
+
+Using `curl` and `jq`:
+
+```bash
+# Get the list of found matches
+curl -s "http://localhost:8080/api/v1/matches" | jq
+```
+
+Using `grpcurl`:
+
+```bash
+# Get the list of found matches
+grpcurl -plaintext localhost:8080 finder2d.v1.Finder2D.GetMatches
+```
+
+Sample Output:
+
+```json
+{
+  "api": "v1",
+  "matches": [
+    {
+      "x": 80,
+      "y": 0,
+      "percentage": 99.111115
+    },
+....
+    {
+      "x": 84,
+      "y": 84,
+      "percentage": 98.666664
+    }
+  ]
+}
+```
+
+### GetMatch
+
+The gRPC method `GetMatch` return the requested match identified by it's index in the list. This method will return an error if the index is out of range.
+
+The request is a JSON object  with the index or ID (`"id"`) of the required match. The response is a JSON object with the match (`"match"`) and the Matrix (`"matrix"`). The Match is a JSON object with the coordinates (`"x"`, `"y"`) and the matching percentage (`"percentage"`). The Matrix is a JSON object with the width (`"width"`), height (`"height"`) and the content of the matrix (`"content"`) as a string.
+
+The REST/HTTP route is `/api/v1/match/{id}` with the HTTP method `GET`.
+
+Using `curl` and `jq`:
+
+```bash
+# Get the list of found matches
+curl -s "http://localhost:8080/api/v1/match/0" | jq
+```
+
+Using `grpcurl`:
+
+```bash
+# Get the list of found matches
+grpcurl -plaintext \
+  -d '{"api": "v1", "id": 1}' \
+  localhost:8080 finder2d.v1.Finder2D.GetMatch
+```
+
+Sample Output:
+
+```json
+{
+  "api": "v1",
+  "match": {
+    "x": 84,
+    "y": 84,
+    "percentage": 98.666664
+  },
+  "matrix": {
+    "width": 15,
+    "height": 15,
+    "content": "+             +\n+++         +++\n +++++++ ......             \n"
+  }
+}
+```
 
 ## TODO
 
 - [x] Implement the LoadMatrix gRPC method
-- [ ] Define and implement the Search gRPC method
+- [x] Define and implement the Search gRPC method
 - [ ] Create the Docker Compose for the services
 - [ ] Create the Kubernetes Manifest for the services
-- [ ] Allow to load multimple targets
+- [ ] Allow to load multiple targets
 - [ ] Create a DB service to store the matrixes
 - [ ] Build a UI
 

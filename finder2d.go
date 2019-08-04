@@ -161,7 +161,19 @@ func (f *Finder2D) LoadTarget(r io.Reader) error {
 // match in the simplest way which is to iterate thru the entire matrix searching
 // for the pattern, storing the match when the match percentage is higher than
 // the required
-func (f *Finder2D) SearchSimple() {
+func (f *Finder2D) SearchSimple() error {
+	if f.Source == nil {
+		return fmt.Errorf("not set source matrix")
+	}
+	if f.Target == nil {
+		return fmt.Errorf("not set target matrix")
+	}
+	if f.Percentage == 0 {
+		return fmt.Errorf("percentage cannot be 0%%")
+	}
+	if f.Delta == 0 {
+		return fmt.Errorf("delta cannot be 0")
+	}
 	maxX, maxY := f.Source.Size()
 	width, height := f.Target.Size()
 
@@ -173,7 +185,7 @@ func (f *Finder2D) SearchSimple() {
 			}
 			p, err := sample.Compare(f.Target)
 			if err != nil {
-				return
+				return err
 			}
 			if p >= f.Percentage {
 				f.Matches = append(f.Matches, Match{
@@ -186,6 +198,8 @@ func (f *Finder2D) SearchSimple() {
 	}
 
 	f.Matches = reduceMatches(f.Matches, f.Delta)
+
+	return nil
 }
 
 func around(m Match, ms []Match, d int) bool {
