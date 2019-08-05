@@ -1,4 +1,4 @@
-[![Build Status](https://api.travis-ci.org/streadway/amqp.svg)](http://travis-ci.org/streadway/amqp)
+[![Build Status](https://travis-ci.org/johandry/finder2d.svg?branch=master)](https://travis-ci.org/johandry/finder2d) [![GoDoc](https://godoc.org/github.com/johandry/finder2d?status.svg)](https://godoc.org/github.com/johandry/finder2d)
 
 # Finder 2D
 
