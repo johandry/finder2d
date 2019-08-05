@@ -1,3 +1,5 @@
+[![Build Status](https://api.travis-ci.org/streadway/amqp.svg)](http://travis-ci.org/streadway/amqp)
+
 # Finder 2D
 
 Finder 2D is a package to recognize or find a target string or pattern in a source string. Both, the pattern and the source string, are bi-dimensional arrays.
