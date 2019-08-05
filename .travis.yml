@@ -7,7 +7,7 @@ go:
 
 script:
   - make
-  - make docker
+  - make docker-build
 
 env:
   global:
