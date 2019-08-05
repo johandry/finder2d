@@ -31,7 +31,7 @@ correct answer.
 
 ## Installing `finder2d`
 
-To get the binary use `go get`:
+To get the package or binary use `go get`:
 
 ```bash
 go get github.com/johandry/finder2d
@@ -58,6 +58,65 @@ Or, build and run the Docker image from source:
 make docker-build
 make docker-run
 ```
+
+## Using the `github.com/johandry/finder2d` package
+
+First, get the package with `go get` and add it into the `go.mod` file (if using modules).
+
+Import the package and create the finder with the matrix values for the On and Off cells, the matching percentage and the blurry image delta. 
+
+```go
+import "github.com/johandry/finder2d"
+
+var on, off byte
+on = []byte(`+`)[0]
+off = []byte(` `)[0]
+percentage := 70.0
+delta := 1
+
+finder := finder2d.New(on, off, percentage, delta)
+```
+
+Before search any pattern it's required to load the frame or source matrix from a reader using the `LoadSource()` function. The following example provide the frame from a file reader.
+
+```go
+sourceFileName := "frame.txt"
+var sourceFile *os.File
+if sourceFile, err := os.Open(sourceFileName); err != nil {
+	return fmt.Errorf("fail to open the frame file %q. %s", sourceFileName, err)
+}
+
+if err := finder.LoadSource(sourceFile); err != nil {
+	return fmt.Errorf("fail to load the source file %q. %s", sourceFileName, err)
+}
+```
+
+Then load the image to search or target matrix using the `LoadTarget()` function. In this example, the image come from a string.
+
+```go
+image := `++ +++   +++ ++\n++           ++\n++ .... + \n     +++++\n`
+imgReader := bytes.NewBufferString(image)
+
+if err := finder.LoadTarget(imgReader); err != nil {
+	return fmt.Errorf("fail to load the target matrix. %s", err)
+}
+```
+
+Having the source and target matrix loaded the finder is ready to do the search with `SearchSimple()`
+
+```go
+if err := finder.SearchSimple(); err != nil {
+	return fmt.Errorf("failed to search the target matrix. %s", err)
+}
+```
+
+To have the list of matches in JSON format use the function `String()`.
+
+```go
+fmt.Println(finder)
+```
+
+To know more about the package read the [GoDoc](https://godoc.org/github.com/johandry/finder2d).
 
 ## Running `finder2d` in CLI mode
 
@@ -453,6 +512,7 @@ Sample Output:
 - [x] Create the Docker Compose for the services
 - [x] Start server mode by default when the image file is not provided
 - [x] Accept parameter in environment variables as well as with arguments
+- [x] CI/CD with Travis and/or others (CircleCI?)
 - [ ] Create the Kubernetes Manifest for the services
 - [ ] Allow to load multiple targets
 - [ ] Create a DB service to store the matrixes
@@ -462,7 +522,6 @@ Sample Output:
 - [ ] Go serverless 
 - [ ] Security: Implement TLS
 - [ ] Security: Implement JWT
-- [ ] CI/CD with Travis and/or others (CircleCI?)
 
 ## Other algorithms to improve the search
 
