@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/johandry/finder2d.svg?branch=master)](https://travis-ci.org/johandry/finder2d) [![GoDoc](https://godoc.org/github.com/johandry/finder2d?status.svg)](https://godoc.org/github.com/johandry/finder2d)
+[![Build Status](https://travis-ci.org/johandry/finder2d.svg?branch=master)](https://travis-ci.org/johandry/finder2d) [![codecov](https://codecov.io/gh/johandry/finder2d/branch/master/graph/badge.svg)](https://codecov.io/gh/johandry/finder2d) [![GoDoc](https://godoc.org/github.com/johandry/finder2d?status.svg)](https://godoc.org/github.com/johandry/finder2d) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 # Finder 2D
 

@@ -14,7 +14,7 @@ build:
 	go build -o bin/$(APP_NAME) cmd/finder2d/main.go
 
 test:
-	go test -v ./...
+	go test -race -coverprofile=coverage.txt -covermode=atomic -v ./...
 
 # remove the unused modules and download the missing ones
 mod:
