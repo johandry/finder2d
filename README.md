@@ -512,15 +512,16 @@ Sample Output:
 - [x] Create the Docker Compose for the services
 - [x] Start server mode by default when the image file is not provided
 - [x] Accept parameter in environment variables as well as with arguments
-- [x] CI/CD with Travis and/or others (CircleCI?)
+- [x] CI/CD with Travis and Docker Hub
 - [ ] Create the Kubernetes Manifest for the services
+- [ ] Security: Implement TLS
+- [ ] Try CircleCI
 - [ ] Allow to load multiple targets
 - [ ] Create a DB service to store the matrixes
 - [ ] Make a client `finder2dctl`
 - [ ] Make a client in other language (Python? Ruby?)
 - [ ] Build a UI
 - [ ] Go serverless 
-- [ ] Security: Implement TLS
 - [ ] Security: Implement JWT
 
 ## Other algorithms to improve the search
