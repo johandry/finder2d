@@ -265,6 +265,29 @@ docker-compose stop
 docker-compose down
 ```
 
+## Running `finder2d` on Kubernetes
+
+This project has only being tested on Kubernetes on Docker for Mac. It should also work on MiniKube or  other multi-node cluster such as EKS and GKS.
+
+Using `kubectl` apply the Kubernetes manifest and verify the loaded resources:
+
+```bash
+kubectl apply -f manifest.yml
+kubectl get all -ns finder2d
+```
+
+
+
+When you are done, execute the following command to destroy everything:
+
+```bash
+kubectl delete -f manifest.yml
+# Or
+kubectl delete ns finder2d
+```
+
+
+
 ## API version 1
 
 ### GetMatrix
